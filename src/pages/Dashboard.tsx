@@ -732,7 +732,7 @@ export function Dashboard() {
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px]">
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              {isSidebarOpen && <span className="truncate text-lg font-bold">BogorHub</span>}
+              {isSidebarOpen && <span className="truncate text-lg font-bold">Boga</span>}
             </Link>
             {isSidebarOpen && (
               <Button variant="ghost" size="icon" className="ml-auto h-8 w-8">
@@ -851,8 +851,8 @@ export function Dashboard() {
             <SheetContent side="left" className="flex flex-col bg-card">
               <nav className="grid gap-4 text-base font-medium">
                 <Link to="#" className="flex items-center gap-2 text-lg font-bold">
-                  <img src="/favicon.svg" alt="BogorHub Logo" className="h-8 w-8 shrink-0 object-contain rounded-full" />
-                  <span>BogorHub</span>
+                  <img src="/favicon.svg" alt="Boga Logo" className="h-8 w-8 shrink-0 object-contain rounded-full" />
+                  <span>Boga</span>
                 </Link>
 
                 <div>
@@ -945,7 +945,7 @@ export function Dashboard() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Cari di BogorHub..."
+                  placeholder="Cari di Boga..."
                   className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3 text-xs"
                 />
               </div>

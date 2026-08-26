@@ -36,7 +36,7 @@ export function Login() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">BogorHub Admin</CardTitle>
+          <CardTitle className="text-2xl">Boga Admin</CardTitle>
           <CardDescription>
             Enter your email below to login to your account.
           </CardDescription>
