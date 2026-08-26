@@ -48,7 +48,7 @@ export function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@bogorhub.id"
+                placeholder="admin@boga.id"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

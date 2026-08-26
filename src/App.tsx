@@ -5,7 +5,7 @@ import { Dashboard } from './pages/Dashboard'
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="bogorhub-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="boga-theme">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
