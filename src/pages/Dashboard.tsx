@@ -236,88 +236,7 @@ export function Dashboard() {
         setReports(formattedReports)
         setRlsWarning(false)
       } else {
-        // Fallback sample reports matching user's database state (3 SUBMITTED, 3 DRAFT)
-        setRlsWarning(true)
-        setReports([
-          {
-            id: "r1a2b3c4-0001-4000-8000-111111111111",
-            phone_number: "6281310346094",
-            nama: "Prabowo Subianto",
-            category: "Jalan Rusak/Berlubang",
-            description: "Jalan berlubang parah di dekat traffic light Pajajaran Kota Bogor.",
-            location_text: "Jl. Pajajaran No. 42, Kel. Pabaton, Kec. Bogor Tengah",
-            latitude: -6.5971,
-            longitude: 106.7995,
-            media_url: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600",
-            status: "SUBMITTED",
-            created_at: "09/08/2026, 14:00:00",
-          },
-          {
-            id: "r2b3c4d5-0002-4000-8000-222222222222",
-            phone_number: "089876543210",
-            nama: "Siti Aminah",
-            category: "Sampah Ilegal/Menumpuk/Sembarangan",
-            description: "Penumpukan sampah liar di trotoar jalan raya Tajur.",
-            location_text: "Jl. Raya Tajur, Kel. Baranangsiang, Kec. Bogor Timur",
-            latitude: -6.621,
-            longitude: 106.812,
-            media_url: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=600",
-            status: "SUBMITTED",
-            created_at: "08/08/2026, 10:30:00",
-          },
-          {
-            id: "r3c4d5e6-0003-4000-8000-333333333333",
-            phone_number: "081234567890",
-            nama: "Budi Santoso",
-            category: "Kebakaran",
-            description: "Laporan keadaan darurat kebakaran di kawasan pemukiman warga.",
-            location_text: "Jl. Pemuda, Kel. Kedunghalang, Kec. Bogor Utara",
-            latitude: -6.578,
-            longitude: 106.801,
-            media_url: null,
-            status: "SUBMITTED",
-            created_at: "09/08/2026, 18:15:00",
-          },
-          {
-            id: "r4d5e6f7-0004-4000-8000-444444444444",
-            phone_number: "6281310346094",
-            nama: "Prabowo Subianto",
-            category: "Fasilitas Publik Rusak",
-            description: "Draf laporan fasilitas taman umum yang butuh perbaikan.",
-            location_text: "Taman Kencana, Kel. Babakan, Kec. Bogor Tengah",
-            latitude: -6.589,
-            longitude: 106.798,
-            media_url: null,
-            status: "DRAFT",
-            created_at: "07/08/2026, 09:12:00",
-          },
-          {
-            id: "r5e6f7g8-0005-4000-8000-555555555555",
-            phone_number: "089876543210",
-            nama: "Siti Aminah",
-            category: "Pohon Tumbang",
-            description: "Draf pengaduan dahan pohon rindang berpotensi patah.",
-            location_text: "Jl. Ahmad Yani, Kel. Tanah Sareal, Kec. Tanah Sareal",
-            latitude: -6.572,
-            longitude: 106.795,
-            media_url: null,
-            status: "DRAFT",
-            created_at: "06/08/2026, 16:45:00",
-          },
-          {
-            id: "r6f7g8h9-0006-4000-8000-666666666666",
-            phone_number: "081234567890",
-            nama: "Budi Santoso",
-            category: "Lampu Penerangan Jalan Mati/Rusak/Hilang",
-            description: "Draf laporan LPJU mati di jalan pemukiman.",
-            location_text: "Jl. Siliwangi, Kel. Sukasari, Kec. Bogor Timur",
-            latitude: -6.611,
-            longitude: 106.808,
-            media_url: null,
-            status: "DRAFT",
-            created_at: "05/08/2026, 21:05:00",
-          },
-        ])
+        setReports([])
       }
 
       // 5. Fetch Real Service Requests
@@ -360,6 +279,26 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchSupabaseData()
+
+    // Setup Realtime subscriptions
+    const reportsSubscription = supabase
+      .channel('public:reports')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        fetchSupabaseData()
+      })
+      .subscribe()
+
+    const requestsSubscription = supabase
+      .channel('public:service_requests')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
+        fetchSupabaseData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(reportsSubscription)
+      supabase.removeChannel(requestsSubscription)
+    }
   }, [fetchSupabaseData])
 
   // --- REAL SUPABASE STATUS UPDATES ---
@@ -517,11 +456,8 @@ export function Dashboard() {
   })
 
   const adminTrendData = [
-    { bulan: "Mei", completed: 1, processing: 1, waiting_input: 0, cancelled: 0 },
-    { bulan: "Jun", completed: 2, processing: 1, waiting_input: 1, cancelled: 0 },
-    { bulan: "Jul", completed: 3, processing: 2, waiting_input: 1, cancelled: 1 },
     {
-      bulan: "Agt",
+      bulan: "Saat Ini",
       completed: requests.filter((r) => r.status === "COMPLETED").length,
       processing: requests.filter((r) => r.status === "PROCESSING" || r.status === "IN_PROGRESS").length,
       waiting_input: requests.filter((r) => r.status === "WAITING_INPUT" || r.status === "SUBMITTED").length,
@@ -532,39 +468,36 @@ export function Dashboard() {
   const adminStatusPieData = [
     {
       name: "COMPLETED (Selesai)",
-      value: requests.filter((r) => r.status === "COMPLETED").length || 1,
+      value: requests.filter((r) => r.status === "COMPLETED").length,
       color: "#10b981",
     },
     {
       name: "PROCESSING (Diproses)",
-      value: requests.filter((r) => r.status === "PROCESSING" || r.status === "IN_PROGRESS").length || 1,
+      value: requests.filter((r) => r.status === "PROCESSING" || r.status === "IN_PROGRESS").length,
       color: "#3b82f6",
     },
     {
       name: "WAITING_INPUT (Menunggu Input)",
-      value: requests.filter((r) => r.status === "WAITING_INPUT" || r.status === "SUBMITTED").length || 1,
+      value: requests.filter((r) => r.status === "WAITING_INPUT" || r.status === "SUBMITTED").length,
       color: "#a855f7",
     },
     {
       name: "CANCELLED (Dibatalkan)",
-      value: requests.filter((r) => r.status === "CANCELLED" || r.status === "REJECTED").length || 0,
+      value: requests.filter((r) => r.status === "CANCELLED" || r.status === "REJECTED").length,
       color: "#ef4444",
     },
   ].filter((item) => item.value > 0)
 
   const requestsByDinasChartData = [
-    { dinas: "Disdukcapil", jumlah: requests.filter((r) => r.service_code.includes("DISDUKCAPIL")).length || 3, fill: "#3b82f6" },
-    { dinas: "Dinas Sosial", jumlah: requests.filter((r) => r.service_code.includes("DINSOS")).length || 2, fill: "#10b981" },
-    { dinas: "Dinas Kesehatan", jumlah: requests.filter((r) => r.service_code.includes("DINKES")).length || 1, fill: "#f59e0b" },
-    { dinas: "DPMPTSP / Perizinan", jumlah: requests.filter((r) => r.service_code.includes("PERIZINAN")).length || 1, fill: "#a855f7" },
+    { dinas: "Disdukcapil", jumlah: requests.filter((r) => r.service_code.includes("DISDUKCAPIL")).length, fill: "#3b82f6" },
+    { dinas: "Dinas Sosial", jumlah: requests.filter((r) => r.service_code.includes("DINSOS")).length, fill: "#10b981" },
+    { dinas: "Dinas Kesehatan", jumlah: requests.filter((r) => r.service_code.includes("DINKES")).length, fill: "#f59e0b" },
+    { dinas: "DPMPTSP / Perizinan", jumlah: requests.filter((r) => r.service_code.includes("PERIZINAN")).length, fill: "#a855f7" },
   ]
 
   const reportTrendData = [
-    { bulan: "Mei", submitted: 0, in_process: 0, done: 0, draft: 1, rejected: 0 },
-    { bulan: "Jun", submitted: 1, in_process: 1, done: 1, draft: 1, rejected: 0 },
-    { bulan: "Jul", submitted: 1, in_process: 1, done: 2, draft: 2, rejected: 1 },
     {
-      bulan: "Agt",
+      bulan: "Saat Ini",
       submitted: reports.filter((r) => r.status === "SUBMITTED").length,
       in_process: reports.filter((r) => r.status === "IN_PROCESS" || r.status === "IN_PROGRESS").length,
       done: reports.filter((r) => r.status === "DONE" || r.status === "RESOLVED").length,
@@ -573,12 +506,14 @@ export function Dashboard() {
     },
   ]
 
-  const reportLocationData = [
-    { kecamatan: "Bogor Tengah", jumlah: 3 },
-    { kecamatan: "Bogor Timur", jumlah: 2 },
-    { kecamatan: "Bogor Utara", jumlah: 1 },
-    { kecamatan: "Tanah Sareal", jumlah: 1 },
-  ]
+  const reportLocationData = Object.entries(
+    reports.reduce((acc, r) => {
+      const match = r.location_text.match(/Kec\.\s*([^,]+)/i);
+      const kec = match ? match[1].trim() : "Lainnya";
+      acc[kec] = (acc[kec] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  ).map(([kecamatan, jumlah]) => ({ kecamatan, jumlah }));
 
   const reportStatusChartData = [
     {
